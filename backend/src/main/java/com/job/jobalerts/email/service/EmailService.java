@@ -1,46 +1,43 @@
 package com.job.jobalerts.email.service;
 
+import com.resend.Resend;
+import com.resend.core.exception.ResendException;
+import com.resend.services.emails.model.CreateEmailOptions;
+import com.resend.services.emails.model.CreateEmailResponse;
 import jakarta.annotation.PostConstruct;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
-import jakarta.mail.internet.MimeMessage;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class EmailService {
 
-    private final JavaMailSender mailSender;
+    @Value("${resend.api.key}")
+    private String apiKey;
 
-    @Value("${MAIL_FROM:mohankumaronly81@gmail.com}")
+    @Value("${resend.from.email:onboarding@resend.dev}")
     private String fromEmail;
 
-    @Value("${MAIL_FROM_NAME:Job Alerts}")
+    @Value("${resend.from.name:Job Alerts}")
     private String fromName;
+
+    private Resend resend;
 
     @PostConstruct
     public void init() {
-        log.info("========== EMAIL SERVICE DEBUG ==========");
+        this.resend = new Resend(apiKey);
+        log.info("========== RESEND EMAIL SERVICE INITIALIZED ==========");
         log.info("From Email: {}", fromEmail);
         log.info("From Name: {}", fromName);
-        log.info("=========================================");
+        log.info("======================================================");
     }
 
     public void sendOtpEmail(String toEmail, String otp) {
         log.info("Sending OTP to: {}", toEmail);
 
         try {
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-
-            helper.setFrom(fromEmail, fromName);
-            helper.setTo(toEmail);
-            helper.setSubject("Your OTP for Job Alerts");
-
+            String subject = "Your OTP for Job Alerts";
             String htmlContent = String.format("""
                 <!DOCTYPE html>
                 <html>
@@ -64,14 +61,20 @@ public class EmailService {
                 </html>
                 """, otp);
 
-            helper.setText(htmlContent, true);
-            mailSender.send(message);
-            log.info("✅ OTP email sent successfully to: {}", toEmail);
+            CreateEmailOptions email = CreateEmailOptions.builder()
+                    .from(fromName + " <" + fromEmail + ">")
+                    .to(toEmail)
+                    .subject(subject)
+                    .html(htmlContent)
+                    .build();
 
-        } catch (Exception e) {
+            CreateEmailResponse response = resend.emails().send(email);
+            log.info("✅ OTP email sent successfully to: {}. Message ID: {}", toEmail, response.getId());
+
+        } catch (ResendException e) {
             log.error("Failed to send OTP email to: {}", toEmail, e);
             System.out.println("=========================================");
-            System.out.println("📧 EMAIL FAILED - Using Console OTP");
+            System.out.println("📧 RESEND EMAIL FAILED - Using Console OTP");
             System.out.println("OTP for " + toEmail + ": " + otp);
             System.out.println("=========================================");
         }
@@ -81,13 +84,7 @@ public class EmailService {
         log.info("Sending welcome email to: {}", toEmail);
 
         try {
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-
-            helper.setFrom(fromEmail, fromName);
-            helper.setTo(toEmail);
-            helper.setSubject("Welcome to Job Alerts! 🎉");
-
+            String subject = "Welcome to Job Alerts! 🎉";
             String htmlContent = """
                 <!DOCTYPE html>
                 <html>
@@ -106,11 +103,17 @@ public class EmailService {
                 </html>
                 """;
 
-            helper.setText(htmlContent, true);
-            mailSender.send(message);
-            log.info("✅ Welcome email sent successfully to: {}", toEmail);
+            CreateEmailOptions email = CreateEmailOptions.builder()
+                    .from(fromName + " <" + fromEmail + ">")
+                    .to(toEmail)
+                    .subject(subject)
+                    .html(htmlContent)
+                    .build();
 
-        } catch (Exception e) {
+            CreateEmailResponse response = resend.emails().send(email);
+            log.info("✅ Welcome email sent successfully to: {}. Message ID: {}", toEmail, response.getId());
+
+        } catch (ResendException e) {
             log.error("Failed to send welcome email to: {}", toEmail, e);
         }
     }
@@ -119,18 +122,17 @@ public class EmailService {
         log.info("Sending email to: {}", toEmail);
 
         try {
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            CreateEmailOptions email = CreateEmailOptions.builder()
+                    .from(fromName + " <" + fromEmail + ">")
+                    .to(toEmail)
+                    .subject(subject)
+                    .html(htmlContent)
+                    .build();
 
-            helper.setFrom(fromEmail, fromName);
-            helper.setTo(toEmail);
-            helper.setSubject(subject);
-            helper.setText(htmlContent, true);
+            CreateEmailResponse response = resend.emails().send(email);
+            log.info("✅ Email sent successfully to: {}. Message ID: {}", toEmail, response.getId());
 
-            mailSender.send(message);
-            log.info("✅ Email sent successfully to: {}", toEmail);
-
-        } catch (Exception e) {
+        } catch (ResendException e) {
             log.error("Failed to send email to: {}", toEmail, e);
         }
     }
