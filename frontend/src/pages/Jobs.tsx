@@ -5,7 +5,6 @@ import {
   FiMapPin, 
   FiCalendar, 
   FiSearch, 
-  FiRefreshCw,
   FiFilter,
   FiChevronDown,
   FiX,
@@ -23,7 +22,6 @@ const Jobs: React.FC = () => {
   const [filteredJobs, setFilteredJobs] = useState<Job[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [isSyncing, setIsSyncing] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -56,19 +54,6 @@ const Jobs: React.FC = () => {
       setJobs([]);
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const handleSync = async () => {
-    setIsSyncing(true);
-    setError(null);
-    try {
-      await jobService.syncJobs();
-      await fetchJobs();
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to sync jobs.');
-    } finally {
-      setIsSyncing(false);
     }
   };
 
@@ -195,14 +180,6 @@ const Jobs: React.FC = () => {
               {filteredJobs.length} jobs available for Tap Academy students
             </p>
           </div>
-          <button
-            onClick={handleSync}
-            disabled={isSyncing}
-            className="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 transition-colors duration-200 flex items-center gap-2 disabled:opacity-50"
-          >
-            <FiRefreshCw className={`w-4 h-4 ${isSyncing ? 'animate-spin' : ''}`} />
-            {isSyncing ? 'Syncing...' : 'Sync Jobs'}
-          </button>
         </div>
 
         {/* Error Message */}
