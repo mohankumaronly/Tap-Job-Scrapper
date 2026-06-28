@@ -1,5 +1,5 @@
 import api from './api';
-import type { Job, JobsResponse } from '../types/job';
+import type { Job } from '../types/job';
 
 export const jobService = {
   // Get all jobs
