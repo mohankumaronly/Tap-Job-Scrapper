@@ -25,9 +25,16 @@ public class JobSyncService {
     private final JobRepository jobRepository;
     private final EmailNotificationService emailNotificationService;
 
+    // Default sync with email notifications enabled
     @Transactional
     public SyncResult syncJobs() {
-        log.info("Starting job sync from Tap Academy");
+        return syncJobs(true);
+    }
+
+    // Sync with option to control email sending
+    @Transactional
+    public SyncResult syncJobs(boolean sendEmails) {
+        log.info("Starting job sync from Tap Academy (Email sending: {})", sendEmails);
 
         SyncResult result = new SyncResult();
         List<Job> newJobs = new ArrayList<>();
@@ -37,8 +44,8 @@ public class JobSyncService {
 
             if (response == null || response.getData() == null || response.getData().isEmpty()) {
                 log.warn("No jobs received from Tap Academy");
-                result.setMessage("No jobs to sync");
                 result.setSuccess(true);
+                result.setMessage("No jobs to sync");
                 return result;
             }
 
@@ -67,12 +74,20 @@ public class JobSyncService {
                     result.getSkipped(),
                     newJobs.size());
 
-            // Send email notifications for new jobs
+            // Send email notifications for new jobs based on sendEmails flag
             if (!newJobs.isEmpty()) {
-                log.info("Sending job alerts for {} new jobs to all subscribers", newJobs.size());
-                emailNotificationService.sendNewJobAlertsToSubscribers(newJobs);
+                if (sendEmails) {
+                    log.info("Sending job alerts for {} new jobs to all subscribers", newJobs.size());
+                    emailNotificationService.sendNewJobAlertsToSubscribers(newJobs);
+                    result.setEmailsSent(true);
+                } else {
+                    log.info("Email sending is disabled. Found {} new jobs but notifications were not sent.", newJobs.size());
+                    result.setEmailsSent(false);
+                    result.setEmailsSkipped(newJobs.size());
+                }
             } else {
                 log.info("No new jobs found, skipping email notifications");
+                result.setEmailsSent(false);
             }
 
         } catch (Exception e) {
@@ -90,6 +105,8 @@ public class JobSyncService {
         private String message;
         private int inserted;
         private int skipped;
+        private boolean emailsSent;
+        private int emailsSkipped;
         private List<Job> newJobs = new ArrayList<>();
 
         public boolean isSuccess() { return success; }
@@ -108,5 +125,13 @@ public class JobSyncService {
 
         public List<Job> getNewJobs() { return newJobs; }
         public void setNewJobs(List<Job> newJobs) { this.newJobs = newJobs; }
+
+        public boolean isEmailsSent() { return emailsSent; }
+        public void setEmailsSent(boolean emailsSent) { this.emailsSent = emailsSent; }
+
+        public int getEmailsSkipped() { return emailsSkipped; }
+        public void setEmailsSkipped(int emailsSkipped) { this.emailsSkipped = emailsSkipped; }
+
+        public int getNewJobsCount() { return newJobs != null ? newJobs.size() : 0; }
     }
 }

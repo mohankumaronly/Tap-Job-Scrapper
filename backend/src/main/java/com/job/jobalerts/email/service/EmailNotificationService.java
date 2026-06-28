@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class EmailNotificationService {
 
-    private final EmailService emailService;
+    private final BrevoApiEmailService emailService;
     private final UserRepository userRepository;
     private final JobAlertTemplate jobAlertTemplate;
 
@@ -28,9 +28,6 @@ public class EmailNotificationService {
 
     private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd MMM yyyy");
 
-    /**
-     * Send job alerts to all subscribed users for new jobs
-     */
     public void sendNewJobAlertsToSubscribers(List<Job> newJobs) {
         if (newJobs == null || newJobs.isEmpty()) {
             log.info("No new jobs to send alerts for");
@@ -46,16 +43,13 @@ public class EmailNotificationService {
 
         log.info("Found {} new jobs. Sending alerts to {} subscribers", newJobs.size(), subscribers.size());
 
-        // Convert Jobs to DTOs
         List<JobAlertDTO> jobAlertDTOS = newJobs.stream()
                 .map(this::convertToJobAlertDTO)
                 .collect(Collectors.toList());
 
-        // Send ONE email per user with ALL new jobs
         for (User user : subscribers) {
             try {
                 sendJobAlertEmail(user, jobAlertDTOS);
-                // Small delay to avoid rate limiting
                 Thread.sleep(100);
             } catch (Exception e) {
                 log.error("Failed to send job alert to {}: {}", user.getEmail(), e.getMessage());
@@ -65,9 +59,6 @@ public class EmailNotificationService {
         log.info("Successfully sent job alerts to {} subscribers", subscribers.size());
     }
 
-    /**
-     * Send single job alert email to a specific user (for testing)
-     */
     public void sendTestJobAlert(String testEmail, List<Job> newJobs) {
         log.info("Sending test job alert to: {}", testEmail);
 

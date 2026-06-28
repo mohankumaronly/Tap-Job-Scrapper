@@ -45,8 +45,11 @@ public class EnvConfig implements ApplicationContextInitializer<ConfigurableAppl
             // Load Tap Academy configuration
             loadTapAcademyProperties(envProperties);
 
-            // Load Mail (Gmail SMTP) configuration
-            loadMailProperties(envProperties);
+            // Load Brevo SMTP configuration (instead of Gmail)
+            loadBrevoMailProperties(envProperties);
+
+            // Load Scraper configuration
+            loadScraperProperties(envProperties);
 
             // Load general application properties
             loadGeneralProperties(envProperties);
@@ -138,51 +141,90 @@ public class EnvConfig implements ApplicationContextInitializer<ConfigurableAppl
         }
     }
 
-    // Load Gmail SMTP properties
-    private void loadMailProperties(Map<String, Object> props) {
-        String mailHost = dotenv.get("MAIL_HOST");
-        if (mailHost != null && !mailHost.isEmpty()) {
-            props.put("spring.mail.host", mailHost);
-            System.out.println("✅ Mail Host: " + mailHost);
+    // Load Brevo SMTP properties (updated from Gmail)
+    private void loadBrevoMailProperties(Map<String, Object> props) {
+        // Brevo SMTP Configuration
+        String brevoUsername = dotenv.get("BREVO_USERNAME");
+        String brevoSmtpKey = dotenv.get("BREVO_SMTP_KEY");
+
+        if (brevoUsername != null && !brevoUsername.isEmpty()) {
+            props.put("spring.mail.host", "smtp-brevo.com");
+            props.put("spring.mail.username", brevoUsername);
+            System.out.println("✅ Brevo Mail Username: " + brevoUsername);
+        } else {
+            // Fallback to old Gmail config if Brevo not set
+            String mailHost = dotenv.get("MAIL_HOST");
+            if (mailHost != null && !mailHost.isEmpty()) {
+                props.put("spring.mail.host", mailHost);
+            }
+
+            String mailUsername = dotenv.get("MAIL_USERNAME");
+            if (mailUsername != null && !mailUsername.isEmpty()) {
+                props.put("spring.mail.username", mailUsername);
+            }
         }
 
+        if (brevoSmtpKey != null && !brevoSmtpKey.isEmpty()) {
+            props.put("spring.mail.password", brevoSmtpKey);
+            System.out.println("✅ Brevo SMTP Key loaded (length: " + brevoSmtpKey.length() + ")");
+        } else {
+            // Fallback to old Gmail config
+            String mailPassword = dotenv.get("MAIL_PASSWORD");
+            if (mailPassword != null && !mailPassword.isEmpty()) {
+                props.put("spring.mail.password", mailPassword);
+            }
+        }
+
+        // SMTP Port - Brevo uses 587
         String mailPort = dotenv.get("MAIL_PORT");
         if (mailPort != null && !mailPort.isEmpty()) {
             props.put("spring.mail.port", mailPort);
-        }
-
-        String mailUsername = dotenv.get("MAIL_USERNAME");
-        if (mailUsername != null && !mailUsername.isEmpty()) {
-            props.put("spring.mail.username", mailUsername);
-            System.out.println("✅ Mail Username: " + mailUsername);
-        }
-
-        String mailPassword = dotenv.get("MAIL_PASSWORD");
-        if (mailPassword != null && !mailPassword.isEmpty()) {
-            props.put("spring.mail.password", mailPassword);
-            System.out.println("✅ Mail Password loaded (length: " + mailPassword.length() + ")");
-        }
-
-        String mailAuth = dotenv.get("MAIL_SMTP_AUTH");
-        if (mailAuth != null) {
-            props.put("spring.mail.properties.mail.smtp.auth", mailAuth);
         } else {
-            props.put("spring.mail.properties.mail.smtp.auth", "true");
+            props.put("spring.mail.port", "587"); // Default Brevo port
         }
 
-        String mailStartTls = dotenv.get("MAIL_SMTP_STARTTLS_ENABLE");
-        if (mailStartTls != null) {
-            props.put("spring.mail.properties.mail.smtp.starttls.enable", mailStartTls);
-            props.put("spring.mail.properties.mail.smtp.starttls.required", mailStartTls);
-        } else {
-            props.put("spring.mail.properties.mail.smtp.starttls.enable", "true");
-            props.put("spring.mail.properties.mail.smtp.starttls.required", "true");
-        }
-
-        // Default connection timeouts
+        // Mail properties
+        props.put("spring.mail.properties.mail.smtp.auth", "true");
+        props.put("spring.mail.properties.mail.smtp.starttls.enable", "true");
+        props.put("spring.mail.properties.mail.smtp.starttls.required", "true");
         props.put("spring.mail.properties.mail.smtp.connectiontimeout", "5000");
         props.put("spring.mail.properties.mail.smtp.timeout", "5000");
         props.put("spring.mail.properties.mail.smtp.writetimeout", "5000");
+
+        // Enable debug for troubleshooting
+        String debugMail = dotenv.get("MAIL_DEBUG");
+        if (debugMail != null && debugMail.equalsIgnoreCase("true")) {
+            props.put("spring.mail.properties.mail.debug", "true");
+        }
+
+        // Set the from email (using BREVO_USERNAME as from email)
+        if (brevoUsername != null && !brevoUsername.isEmpty()) {
+            props.put("BREVO_USERNAME", brevoUsername);
+            // Also set mail.from.email for EmailService
+            props.put("mail.from.email", brevoUsername);
+        }
+    }
+
+    private void loadScraperProperties(Map<String, Object> props) {
+        String scraperEnabled = dotenv.get("SCRAPER_ENABLED");
+        if (scraperEnabled != null) {
+            props.put("SCRAPER_ENABLED", scraperEnabled);
+        }
+
+        String scraperCron = dotenv.get("SCRAPER_CRON_EXPRESSION");
+        if (scraperCron != null) {
+            props.put("SCRAPER_CRON_EXPRESSION", scraperCron);
+        }
+
+        String scraperSendEmails = dotenv.get("SCRAPER_SEND_EMAILS");
+        if (scraperSendEmails != null) {
+            props.put("SCRAPER_SEND_EMAILS", scraperSendEmails);
+        }
+
+        String scraperLogging = dotenv.get("SCRAPER_LOGGING_ENABLED");
+        if (scraperLogging != null) {
+            props.put("SCRAPER_LOGGING_ENABLED", scraperLogging);
+        }
     }
 
     private void loadGeneralProperties(Map<String, Object> props) {
@@ -239,15 +281,16 @@ public class EnvConfig implements ApplicationContextInitializer<ConfigurableAppl
             props.put("spring.datasource.password", dbPassword);
         }
 
-        // Mail fallback
-        String mailUsername = System.getenv("MAIL_USERNAME");
-        if (mailUsername != null && !props.containsKey("spring.mail.username")) {
-            props.put("spring.mail.username", mailUsername);
+        // Brevo fallback
+        String brevoUsername = System.getenv("BREVO_USERNAME");
+        if (brevoUsername != null && !props.containsKey("spring.mail.username")) {
+            props.put("spring.mail.username", brevoUsername);
+            props.put("BREVO_USERNAME", brevoUsername);
         }
 
-        String mailPassword = System.getenv("MAIL_PASSWORD");
-        if (mailPassword != null && !props.containsKey("spring.mail.password")) {
-            props.put("spring.mail.password", mailPassword);
+        String brevoKey = System.getenv("BREVO_SMTP_KEY");
+        if (brevoKey != null && !props.containsKey("spring.mail.password")) {
+            props.put("spring.mail.password", brevoKey);
         }
     }
 
@@ -275,7 +318,7 @@ public class EnvConfig implements ApplicationContextInitializer<ConfigurableAppl
             System.out.println("🌐 Tap Academy URL: " + props.get("tap.academy.url"));
         }
 
-        // Print Mail config
+        // Print Mail config (Brevo)
         if (props.containsKey("spring.mail.host")) {
             System.out.println("📧 Mail Host: " + props.get("spring.mail.host"));
         }
@@ -289,6 +332,15 @@ public class EnvConfig implements ApplicationContextInitializer<ConfigurableAppl
             String password = (String) props.get("spring.mail.password");
             String maskedPassword = password.substring(0, Math.min(4, password.length())) + "****";
             System.out.println("📧 Mail Password: " + maskedPassword);
+        }
+
+        // Scraper config
+        if (props.containsKey("SCRAPER_ENABLED")) {
+            System.out.println("🔄 Scraper Enabled: " + props.get("SCRAPER_ENABLED"));
+        }
+
+        if (props.containsKey("SCRAPER_CRON_EXPRESSION")) {
+            System.out.println("⏰ Scraper Cron: " + props.get("SCRAPER_CRON_EXPRESSION"));
         }
 
         // Server config

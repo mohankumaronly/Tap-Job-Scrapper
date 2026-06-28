@@ -1,4 +1,7 @@
 spring:
+  config:
+    import: optional:file:.env[.properties]
+
   datasource:
     url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}?sslmode=require
     username: ${DB_USERNAME}
@@ -21,12 +24,20 @@ spring:
         show_sql: ${JPA_SHOW_SQL:true}
     open-in-view: false
 
-resend:
-  api:
-    key: ${RESEND_API_KEY}
-  from:
-    email: ${RESEND_FROM_EMAIL:onboarding@resend.dev}
-    name: ${RESEND_FROM_NAME:Job Alerts}
+  mail:
+    host: smtp-brevo.com
+    port: 587
+    username: ${BREVO_USERNAME}
+    password: ${BREVO_SMTP_KEY}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          connectiontimeout: 30000
+          timeout: 30000
+          writetimeout: 30000
 
 tap:
   academy:
@@ -44,5 +55,6 @@ server:
 logging:
   level:
     com.job.jobalerts: ${LOG_LEVEL_COM_JOB_JOBALERTS:DEBUG}
+    org.springframework.mail: DEBUG
     org.springframework: INFO
     org.hibernate: WARN

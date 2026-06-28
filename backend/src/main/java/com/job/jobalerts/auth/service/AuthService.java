@@ -7,7 +7,7 @@ import com.job.jobalerts.auth.entity.OtpVerification;
 import com.job.jobalerts.auth.entity.User;
 import com.job.jobalerts.auth.repository.OtpRepository;
 import com.job.jobalerts.auth.repository.UserRepository;
-import com.job.jobalerts.email.service.EmailService;
+import com.job.jobalerts.email.service.BrevoApiEmailService;  // Changed import
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -23,7 +23,7 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final OtpRepository otpRepository;
-    private final EmailService emailService;
+    private final BrevoApiEmailService emailService;  // Changed from EmailService
 
     private static final int OTP_EXPIRY_MINUTES = 5;
     private static final int OTP_LENGTH = 6;
@@ -48,7 +48,7 @@ public class AuthService {
                 .build();
         otpRepository.save(otpEntity);
 
-        // Send OTP via email
+        // Send OTP via Brevo API
         emailService.sendOtpEmail(email, otp);
 
         return AuthResponse.builder()
@@ -86,7 +86,7 @@ public class AuthService {
         user.setSubscribed(true);
         userRepository.save(user);
 
-        // Send welcome email
+        // Send welcome email via Brevo API
         emailService.sendWelcomeEmail(email);
 
         return AuthResponse.builder()
