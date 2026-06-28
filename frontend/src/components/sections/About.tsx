@@ -3,7 +3,6 @@ import { motion } from 'framer-motion';
 import { 
   FiShield, 
   FiBell, 
-  FiZap, 
   FiHeart,
   FiUsers,
   FiBriefcase,

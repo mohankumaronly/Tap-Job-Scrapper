@@ -1,23 +1,25 @@
-import React from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import Layout from './components/layout/Layout';
 import Navbar from './components/layout/Navbar';
-import Hero from './components/sections/Hero';
-import HowItWorks from './components/sections/HowItWorks';
-import Features from './components/sections/Features';
-import About from './components/sections/About';
-import FAQ from './components/sections/FAQ';
+import Jobs from './pages/Jobs';
 import Footer from './components/sections/Footer';
 
 function App() {
   return (
-    <div className="min-h-screen bg-[rgb(var(--background))] text-[rgb(var(--foreground))]">
-      <Navbar />
-      <Hero />
-      <HowItWorks />
-      <Features />
-      <About />
-      <FAQ />
-      <Footer />
-    </div>
+    <BrowserRouter>
+      <div className="min-h-screen bg-[rgb(var(--background))] text-[rgb(var(--foreground))]">
+        <Routes>
+          <Route path="/" element={<Layout />} />
+          <Route path="/jobs" element={
+            <>
+              <Navbar />
+              <Jobs />
+              <Footer />
+            </>
+          } />
+        </Routes>
+      </div>
+    </BrowserRouter>
   );
 }
 

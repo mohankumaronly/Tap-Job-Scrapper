@@ -8,7 +8,6 @@ import {
   FiMail,
   FiMapPin,
   FiSend,
-  FiArrowRight
 } from 'react-icons/fi';
 
 const Footer: React.FC = () => {

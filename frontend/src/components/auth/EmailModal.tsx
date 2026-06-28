@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiX, FiMail, FiArrowRight, FiCheckCircle } from 'react-icons/fi';
 import OTPInput from './OTPInput';
+import { authService } from '../../services/authService';
 
 interface EmailModalProps {
   isOpen: boolean;
@@ -17,49 +18,57 @@ const EmailModal: React.FC<EmailModalProps> = ({ isOpen, onClose }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const handleSendOTP = async () => {
-    if (!email) {
-      setError('Please enter your email address');
-      return;
-    }
-    if (!email.includes('@') || !email.includes('.')) {
-      setError('Please enter a valid email address');
-      return;
-    }
+// Replace the handleSendOTP function
+const handleSendOTP = async () => {
+  if (!email) {
+    setError('Please enter your email address');
+    return;
+  }
+  if (!email.includes('@') || !email.includes('.')) {
+    setError('Please enter a valid email address');
+    return;
+  }
 
-    setIsLoading(true);
-    setError('');
+  setIsLoading(true);
+  setError('');
 
-    try {
-      // Simulate API call - Replace with actual API
-      await new Promise(resolve => setTimeout(resolve, 1500));
+  try {
+    const response = await authService.sendOTP(email);
+    if (response.success) {
       setStep('otp');
-    } catch (err) {
-      setError('Failed to send OTP. Please try again.');
-    } finally {
-      setIsLoading(false);
+    } else {
+      setError(response.message || 'Failed to send OTP');
     }
-  };
+  } catch (err: any) {
+    setError(err.response?.data?.message || 'Failed to send OTP. Please try again.');
+  } finally {
+    setIsLoading(false);
+  }
+};
 
-  const handleVerifyOTP = async () => {
-    if (otp.length !== 6) {
-      setError('Please enter a valid 6-digit OTP');
-      return;
-    }
+// Replace the handleVerifyOTP function
+const handleVerifyOTP = async () => {
+  if (otp.length !== 6) {
+    setError('Please enter a valid 6-digit OTP');
+    return;
+  }
 
-    setIsLoading(true);
-    setError('');
+  setIsLoading(true);
+  setError('');
 
-    try {
-      // Simulate API call - Replace with actual API
-      await new Promise(resolve => setTimeout(resolve, 1500));
+  try {
+    const response = await authService.verifyOTP(email, otp);
+    if (response.success) {
       setStep('success');
-    } catch (err) {
-      setError('Invalid OTP. Please try again.');
-    } finally {
-      setIsLoading(false);
+    } else {
+      setError(response.message || 'Invalid OTP. Please try again.');
     }
-  };
+  } catch (err: any) {
+    setError(err.response?.data?.message || 'Invalid OTP. Please try again.');
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   const handleClose = () => {
     setStep('email');
