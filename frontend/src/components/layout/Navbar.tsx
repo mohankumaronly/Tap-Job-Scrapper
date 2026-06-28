@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { useTheme } from '../../hooks/useTheme';
 import { FiSun, FiMoon, FiMenu, FiX, FiBriefcase } from 'react-icons/fi';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import EmailModal from '../auth/EmailModal';
 
 const Navbar: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const location = useLocation();
 
   const navLinks = [
     { label: 'Features', href: '#features' },
@@ -28,6 +29,23 @@ const Navbar: React.FC = () => {
 
   const closeModal = () => {
     setIsModalOpen(false);
+  };
+
+  // Handle section navigation - if on jobs page, navigate to home first
+  const handleSectionClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    e.preventDefault();
+    
+    // If we're on the jobs page, navigate to home with the section hash
+    if (location.pathname === '/jobs') {
+      window.location.href = `/${href}`;
+    } else {
+      // If on home page, just scroll to the section
+      const element = document.querySelector(href);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+    setIsMenuOpen(false);
   };
 
   return (
@@ -62,6 +80,7 @@ const Navbar: React.FC = () => {
                   <a
                     key={link.label}
                     href={link.href}
+                    onClick={(e) => handleSectionClick(e, link.href)}
                     className="text-sm font-medium text-[rgb(var(--foreground))]/70 hover:text-[rgb(var(--foreground))] transition-colors duration-200 relative group"
                   >
                     {link.label}
@@ -130,8 +149,11 @@ const Navbar: React.FC = () => {
                     <a
                       key={link.label}
                       href={link.href}
+                      onClick={(e) => {
+                        handleSectionClick(e, link.href);
+                        setIsMenuOpen(false);
+                      }}
                       className="text-sm font-medium text-[rgb(var(--foreground))]/70 hover:text-[rgb(var(--foreground))] transition-colors duration-200"
-                      onClick={() => setIsMenuOpen(false)}
                     >
                       {link.label}
                     </a>

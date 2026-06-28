@@ -1,15 +1,15 @@
 export interface Job {
   id: number;
-  title: string;
-  company: string;
+  jobId: number;
+  jobTitle: string;
+  jobRole: string;
+  packageLpa: number;
   location: string;
-  description: string;
-  requirements?: string[];
-  salary?: string;
-  postedAt: string;
-  isActive: boolean;
-  portalJobId?: string;
-  url?: string;
+  expired: boolean;
+  applied: boolean;
+  interviewDate: string;
+  expiresIn: string;
+  createdAt: string;
 }
 
 export interface JobsResponse {

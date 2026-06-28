@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { FiArrowRight, FiBriefcase, FiUsers, FiCheckCircle, FiAward } from 'react-icons/fi';
+import { FiArrowRight, FiBriefcase, FiUsers, FiCheckCircle, FiAward, FiEye } from 'react-icons/fi';
+import { Link } from 'react-router-dom';
 import EmailModal from '../auth/EmailModal';
 
 const Hero: React.FC = () => {
@@ -83,6 +84,13 @@ const Hero: React.FC = () => {
                 Get Started
                 <FiArrowRight className="w-4 h-4" />
               </button>
+              <Link
+                to="/jobs"
+                className="px-6 py-3 text-sm font-medium text-[rgb(var(--foreground))] border border-[rgb(var(--border))] rounded-lg hover:bg-[rgb(var(--border))] transition-colors duration-200 flex items-center gap-2"
+              >
+                <FiEye className="w-4 h-4" />
+                View Jobs
+              </Link>
               <a
                 href="#features"
                 className="px-6 py-3 text-sm font-medium text-[rgb(var(--foreground))] border border-[rgb(var(--border))] rounded-lg hover:bg-[rgb(var(--border))] transition-colors duration-200"

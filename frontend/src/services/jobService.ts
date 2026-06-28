@@ -3,9 +3,9 @@ import type { Job, JobsResponse } from '../types/job';
 
 export const jobService = {
   // Get all jobs
-  getAllJobs: async (): Promise<JobsResponse> => {
+  getAllJobs: async (): Promise<Job[]> => {
     try {
-      const response = await api.get<JobsResponse>('/api/jobs');
+      const response = await api.get<Job[]>('/api/jobs');
       return response.data;
     } catch (error) {
       console.error('Error fetching jobs:', error);
@@ -13,10 +13,10 @@ export const jobService = {
     }
   },
 
-  // Get active jobs
-  getActiveJobs: async (): Promise<JobsResponse> => {
+  // Get active jobs (not expired)
+  getActiveJobs: async (): Promise<Job[]> => {
     try {
-      const response = await api.get<JobsResponse>('/api/jobs/active');
+      const response = await api.get<Job[]>('/api/jobs/active');
       return response.data;
     } catch (error) {
       console.error('Error fetching active jobs:', error);
@@ -25,9 +25,9 @@ export const jobService = {
   },
 
   // Get job by ID
-  getJobById: async (jobId: string): Promise<{ job: Job }> => {
+  getJobById: async (jobId: number): Promise<Job> => {
     try {
-      const response = await api.get<{ job: Job }>(`/api/jobs/${jobId}`);
+      const response = await api.get<Job>(`/api/jobs/${jobId}`);
       return response.data;
     } catch (error) {
       console.error('Error fetching job:', error);
@@ -58,4 +58,4 @@ export const jobService = {
       throw error;
     }
   }
-};
+}; 
