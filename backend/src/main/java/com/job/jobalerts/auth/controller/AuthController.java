@@ -32,6 +32,11 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/health")
+    public String healthCheck(){
+        return "server up and running";
+    }
+
     @PostMapping("/unsubscribe")
     public ResponseEntity<AuthResponse> unsubscribe(@RequestParam String email) {
         log.info("POST /api/auth/unsubscribe - Email: {}", email);
