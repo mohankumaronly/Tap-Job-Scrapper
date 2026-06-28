@@ -79,7 +79,7 @@ src
 ```bash
 git clone https://github.com/mohankumaronly/Tap-Job-Scrapper.git
 
-cd job-alerts
+cd Tap-Job-Scrapper
 ```
 
 ---
