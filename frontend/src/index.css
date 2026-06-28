@@ -1,0 +1,62 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --background: 248, 250, 252;
+    --foreground: 15, 23, 42;
+    --card: 255, 255, 255;
+    --card-foreground: 15, 23, 42;
+    --border: 226, 232, 240;
+  }
+
+  .dark {
+    --background: 10, 10, 15;
+    --foreground: 255, 255, 255;
+    --card: 26, 26, 46;
+    --card-foreground: 255, 255, 255;
+    --border: 42, 42, 62;
+  }
+
+  body {
+    background-color: rgb(var(--background));
+    color: rgb(var(--foreground));
+    transition: background-color 0.3s, color 0.3s;
+    font-family: Inter, system-ui, -apple-system, sans-serif;
+  }
+}
+
+@layer components {
+  .container-custom {
+    max-width: 1280px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  @media (min-width: 640px) {
+    .container-custom {
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .container-custom {
+      padding-left: 2rem;
+      padding-right: 2rem;
+    }
+  }
+
+  .section-padding {
+    padding-top: 4rem;
+    padding-bottom: 4rem;
+  }
+
+  @media (min-width: 768px) {
+    .section-padding {
+      padding-top: 6rem;
+      padding-bottom: 6rem;
+    }
+  }
+}
