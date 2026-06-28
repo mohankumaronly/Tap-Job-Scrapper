@@ -77,7 +77,7 @@ src
 ## Clone Repository
 
 ```bash
-git clone https://github.com/mohankumaronly/job-alerts.git
+git clone https://github.com/mohankumaronly/Tap-Job-Scrapper.git
 
 cd job-alerts
 ```
