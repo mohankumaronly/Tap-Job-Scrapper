@@ -14,13 +14,13 @@ import java.util.*;
 @Service
 public class BrevoApiEmailService {
 
-    @Value("${BREVO_API_KEY:${BREVO_SMTP_KEY}}")  // Fallback to SMTP key if API key not found
+    @Value("${BREVO_API_KEY:${BREVO_SMTP_KEY}}")
     private String apiKey;
 
-    @Value("${BREVO_FROM_EMAIL:${BREVO_USERNAME}}")  // Use BREVO_FROM_EMAIL, fallback to BREVO_USERNAME
+    @Value("${BREVO_FROM_EMAIL:${BREVO_USERNAME}}")
     private String fromEmail;
 
-    @Value("${BREVO_FROM_NAME:Job Alerts}")  // Use BREVO_FROM_NAME, default to "Job Alerts"
+    @Value("${BREVO_FROM_NAME:JobAlert}")
     private String fromName;
 
     private RestTemplate restTemplate;
@@ -32,7 +32,7 @@ public class BrevoApiEmailService {
     public void init() {
         this.restTemplate = new RestTemplate();
         this.objectMapper = new ObjectMapper();
-        log.info("========== BREVO API EMAIL SERVICE INITIALIZED (REST) ==========");
+        log.info("========== JOBALERT BREVO API SERVICE INITIALIZED ==========");
         log.info("From Email: {}", fromEmail);
         log.info("From Name: {}", fromName);
         if (apiKey != null && !apiKey.isEmpty()) {
@@ -41,32 +41,63 @@ public class BrevoApiEmailService {
         } else {
             log.warn("API Key is empty or null!");
         }
-        log.info("================================================================");
+        log.info("============================================================");
     }
 
     public void sendOtpEmail(String toEmail, String otp) {
-        log.info("📧 Sending OTP via Brevo API (REST) to: {}", toEmail);
+        log.info("📧 Sending OTP via Brevo API to: {}", toEmail);
 
         try {
-            String subject = "Your OTP for Job Alerts";
+            String subject = "Your OTP for JobAlert";
             String htmlContent = String.format("""
                 <!DOCTYPE html>
                 <html>
                 <head>
                     <meta charset="UTF-8">
-                    <title>Job Alerts OTP</title>
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>JobAlert OTP</title>
+                    <style>
+                        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #0f172a; background-color: #f8fafc; margin: 0; padding: 0; }
+                        .container { max-width: 480px; margin: 0 auto; padding: 20px; }
+                        .card { background-color: #ffffff; border-radius: 16px; padding: 40px 32px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); text-align: center; }
+                        .logo { font-size: 24px; font-weight: 700; color: #0f172a; margin-bottom: 4px; }
+                        .logo-icon { color: #2563eb; }
+                        .badge { background-color: #eff6ff; color: #2563eb; padding: 4px 14px; border-radius: 20px; font-size: 12px; font-weight: 500; display: inline-block; margin: 8px 0 20px 0; }
+                        .otp-box { background-color: #f1f5f9; padding: 20px; font-size: 36px; font-weight: 700; letter-spacing: 12px; border-radius: 12px; color: #0f172a; margin: 20px 0; font-family: 'Courier New', monospace; }
+                        .otp-label { color: #475569; font-size: 14px; }
+                        .validity { color: #94a3b8; font-size: 13px; margin: 16px 0; }
+                        .tap-box { background: #f8fafc; padding: 12px; border-radius: 8px; margin-top: 16px; }
+                        .tap-box p { margin: 0; font-size: 13px; color: #475569; }
+                        .tap-box strong { color: #2563eb; }
+                        .footer { margin-top: 24px; padding-top: 20px; border-top: 1px solid #f1f5f9; font-size: 12px; color: #94a3b8; }
+                        .footer p { margin: 0; }
+                    </style>
                 </head>
-                <body style="font-family: Arial, sans-serif;">
-                    <div style="max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
-                        <h2 style="color: #4CAF50;">Job Alerts Subscription</h2>
-                        <p>Your OTP for email verification is:</p>
-                        <div style="background-color: #f4f4f4; padding: 15px; font-size: 32px; font-weight: bold; text-align: center;">
-                            %s
+                <body>
+                    <div class="container">
+                        <div class="card">
+                            <div class="logo">
+                                <span class="logo-icon">💼</span> JobAlert
+                            </div>
+                            <div class="badge">🎓 Built for Tap Academy Students</div>
+                            
+                            <h2 style="margin: 0 0 8px 0; font-size: 22px; color: #0f172a;">Verify Your Email</h2>
+                            <p style="color: #475569; font-size: 15px; margin: 0;">Enter the code below to complete your subscription</p>
+                            
+                            <div class="otp-label">Your OTP Code</div>
+                            <div class="otp-box">%s</div>
+                            
+                            <p class="validity">⏳ This OTP is valid for <strong>5 minutes</strong></p>
+                            
+                            <div class="tap-box">
+                                <p>🎓 <strong>Tap Academy Students</strong> — Get notified about internships and job opportunities</p>
+                            </div>
+                            
+                            <div class="footer">
+                                <p>If you didn't request this, please ignore this email.</p>
+                                <p style="margin-top: 8px;">© 2026 JobAlert. Made with ❤️ for Tap Academy</p>
+                            </div>
                         </div>
-                        <p>This OTP is valid for <strong>5 minutes</strong>.</p>
-                        <p>If you didn't request this, please ignore this email.</p>
-                        <hr>
-                        <p style="color: #888; font-size: 12px;">Job Alerts - Find your dream job</p>
                     </div>
                 </body>
                 </html>
@@ -85,26 +116,58 @@ public class BrevoApiEmailService {
     }
 
     public void sendWelcomeEmail(String toEmail) {
-        log.info("📧 Sending welcome email via Brevo API (REST) to: {}", toEmail);
+        log.info("📧 Sending welcome email via Brevo API to: {}", toEmail);
 
-        String subject = "Welcome to Job Alerts! 🎉";
-        String htmlContent = """
+        String subject = "Welcome to JobAlert! 🎉";
+        String htmlContent = String.format("""
             <!DOCTYPE html>
             <html>
             <head>
                 <meta charset="UTF-8">
-                <title>Welcome to Job Alerts</title>
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Welcome to JobAlert</title>
+                <style>
+                    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #0f172a; background-color: #f8fafc; margin: 0; padding: 0; }
+                    .container { max-width: 480px; margin: 0 auto; padding: 20px; }
+                    .card { background-color: #ffffff; border-radius: 16px; padding: 40px 32px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); text-align: center; }
+                    .logo { font-size: 24px; font-weight: 700; color: #0f172a; margin-bottom: 4px; }
+                    .logo-icon { color: #2563eb; }
+                    .badge { background-color: #eff6ff; color: #2563eb; padding: 4px 14px; border-radius: 20px; font-size: 12px; font-weight: 500; display: inline-block; margin: 8px 0 20px 0; }
+                    .checkmark { font-size: 64px; margin: 16px 0; }
+                    .btn { display: inline-block; padding: 12px 32px; background-color: #2563eb; color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: 500; margin-top: 16px; }
+                    .btn:hover { background-color: #1d4ed8; }
+                    .success-box { margin: 20px 0; padding: 16px; background: #eff6ff; border-radius: 8px; }
+                    .success-box p { margin: 0; font-size: 14px; color: #2563eb; }
+                    .footer { margin-top: 24px; padding-top: 20px; border-top: 1px solid #f1f5f9; font-size: 12px; color: #94a3b8; }
+                    .footer p { margin: 0; }
+                </style>
             </head>
-            <body style="font-family: Arial, sans-serif;">
-                <div style="max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
-                    <h2 style="color: #4CAF50;">Welcome to Job Alerts! 🎉</h2>
-                    <p>Thank you for subscribing to Job Alerts.</p>
-                    <p>You will now receive email notifications when new jobs are posted.</p>
-                    <p>Best regards,<br>Job Alerts Team</p>
+            <body>
+                <div class="container">
+                    <div class="card">
+                        <div class="logo">
+                            <span class="logo-icon">💼</span> JobAlert
+                        </div>
+                        <div class="badge">🎓 Built for Tap Academy Students</div>
+                        
+                        <div class="checkmark">✅</div>
+                        <h2 style="margin: 0 0 8px 0; font-size: 22px; color: #0f172a;">You're All Set! 🎉</h2>
+                        <p style="color: #475569; font-size: 15px; margin: 0;">You'll receive job alerts at <strong>%s</strong></p>
+                        
+                        <div class="success-box">
+                            <p>🎯 You'll be notified when new internships open!</p>
+                        </div>
+                        
+                        <a href="https://your-app.com/jobs" class="btn">Browse Jobs →</a>
+                        
+                        <div class="footer">
+                            <p>© 2026 JobAlert. Made with ❤️ for Tap Academy</p>
+                        </div>
+                    </div>
                 </div>
             </body>
             </html>
-            """;
+            """, toEmail);
 
         sendEmail(toEmail, subject, htmlContent);
     }
