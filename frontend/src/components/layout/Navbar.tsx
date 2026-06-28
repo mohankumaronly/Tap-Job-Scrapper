@@ -58,8 +58,8 @@ const Navbar: React.FC = () => {
               )}
             </button>
 
-            {/* Get Started Button */}
-            <button className="hidden md:block px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 transition-colors duration-200">
+            {/* Get Started Button - FORCED colors */}
+            <button className="hidden md:block px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md bg-blue-600 text-white hover:bg-blue-700">
               Get Started
             </button>
 
@@ -92,7 +92,8 @@ const Navbar: React.FC = () => {
                   {link.label}
                 </a>
               ))}
-              <button className="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 transition-colors duration-200 w-full">
+              {/* Mobile Get Started Button - FORCED colors */}
+              <button className="px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 w-full shadow-sm hover:shadow-md bg-blue-600 text-white hover:bg-blue-700">
                 Get Started
               </button>
             </div>
