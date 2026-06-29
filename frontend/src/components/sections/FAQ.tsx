@@ -82,7 +82,6 @@ const FAQ: React.FC = () => {
   return (
     <section id="faq" className="section-padding bg-[rgb(var(--background))]">
       <div className="container-custom">
-        {/* Section Header */}
         <motion.div
           initial="hidden"
           whileInView="visible"
@@ -128,7 +127,6 @@ const FAQ: React.FC = () => {
           </motion.p>
         </motion.div>
 
-        {/* Search and Filter */}
         <div className="max-w-3xl mx-auto mb-8">
           <div className="flex flex-col sm:flex-row gap-4">
             {/* Search Bar */}
